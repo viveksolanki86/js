@@ -5,8 +5,8 @@
 console.log(3+3);
 
 let name="vivek"
-let age="22"
-let isLoggedIn="false"
+let age=22
+let isLoggedIn=false
 
 // Number => 2 to power 52
 // BigInt=>
@@ -19,8 +19,8 @@ let isLoggedIn="false"
     
 // Object 
 
-console.log(typeof 'vivek');
-
+console.log(typeof null); // object
+console.log(typeof undefined);// undefined
 
 
 
