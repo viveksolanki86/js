@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Level Map</title>
+</head>
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.5.8/browser/pixi.min.js"></script>
+<script>
+const app = new PIXI.Application({
+    width: window.innerWidth,
+    height: window.innerHeight,
+backgroundColor: 0x6dcf63
+});
+document.body.appendChild(app.view);
+
+const centerX = 200;
+
+const world = new PIXI.Container();
+app.stage.addChild(world);
+centerWorld();
+
+// 📊 LEVEL DATA
+const TOTAL_LEVELS = 2000;
+
+const levelData = Array.from({ length: TOTAL_LEVELS }, (_, i) => ({
+    level: i + 1,
+    unlocked: i < 5
+}));
+
+// 📍 POSITIONS
+// 📍 POSITIONS
+const positions = [];
+let startY = 750;
+let gap = 90;
+
+for (let i = 0; i < TOTAL_LEVELS; i++) {
+
+    const y = startY - i * gap;
+
+    let x;
+
+    const step = i % 8;
+
+    switch(step){
+
+        case 0:
+            x = centerX - 100;
+            break;
+
+        case 1:
+            x = centerX - 50;
+            break;
+
+        case 2:
+            x = centerX + 20;
+            break;
+
+        case 3:
+            x = centerX + 100;
+            break;
+
+        case 4:
+            x = centerX + 50;
+            break;
+
+        case 5:
+            x = centerX - 20;
+            break;
+
+        case 6:
+            x = centerX - 100;
+            break;
+
+        case 7:
+            x = centerX;
+            break;
+    }
+
+    positions.push({ x, y });
+}
+
+
+// 🎨 CURVED PATH
+// =======================
+// 🛣️ ROAD PATH
+// =======================
+
+const road = new PIXI.Graphics();
+
+
+// OUTER SHADOW
+road.lineStyle(34, 0x8b5a2b, 0.35);
+
+road.moveTo(positions[0].x, positions[0].y);
+
+for (let i = 1; i < positions.length - 1; i++) {
+
+    const curr = positions[i];
+    const next = positions[i + 1];
+
+    const cx = (curr.x + next.x) / 2;
+    const cy = (curr.y + next.y) / 2;
+
+    road.quadraticCurveTo(
+        curr.x,
+        curr.y,
+        cx,
+        cy
+    );
+}
+
+
+// MAIN ROAD
+road.lineStyle(26, 0xf7d794, 1);
+
+road.moveTo(positions[0].x, positions[0].y);
+
+for (let i = 1; i < positions.length - 1; i++) {
+
+    const curr = positions[i];
+    const next = positions[i + 1];
+
+    const cx = (curr.x + next.x) / 2;
+    const cy = (curr.y + next.y) / 2;
+
+    road.quadraticCurveTo(
+        curr.x,
+        curr.y,
+        cx,
+        cy
+    );
+}
+
+
+// CENTER LIGHT
+road.lineStyle(10, 0xfff6d5, 0.9);
+
+road.moveTo(positions[0].x, positions[0].y);
+
+for (let i = 1; i < positions.length - 1; i++) {
+
+    const curr = positions[i];
+    const next = positions[i + 1];
+
+    const cx = (curr.x + next.x) / 2;
+    const cy = (curr.y + next.y) / 2;
+
+    road.quadraticCurveTo(
+        curr.x,
+        curr.y,
+        cx,
+        cy
+    );
+}
+
+world.addChild(road);
+
+// 🎯 START POSITION
+let currentLevelIndex = 2;
+const targetPos = positions[currentLevelIndex];
+world.y = -targetPos.y + 400;
+
+// ============================
+// 🔥 POOLING SYSTEM
+// ============================
+
+const VISIBLE_COUNT = 20;
+const levelPool = [];
+
+for (let i = 0; i < VISIBLE_COUNT; i++) {
+    const container = new PIXI.Container();
+
+    const circle = new PIXI.Graphics();
+    const text = new PIXI.Text("", {
+        fontSize: 18,
+        fill: "#fff"
+    });
+    text.anchor.set(0.5);
+
+    container.addChild(circle);
+    container.addChild(text);
+
+    container.circle = circle;
+    container.text = text;
+
+    container.interactive = true;
+    container.on("pointerdown", () => {
+        console.log("Level:", container.text.text);
+    });
+
+    world.addChild(container);
+    levelPool.push(container);
+}
+
+// 🔄 UPDATE LEVELS
+function updateLevels() {
+    const visibleTop = -world.y - 200;
+    const visibleBottom = visibleTop + app.screen.height + 400;
+
+    let poolIndex = 0;
+
+    for (let i = 0; i < positions.length; i++) {
+        const pos = positions[i];
+
+        if (pos.y > visibleTop && pos.y < visibleBottom) {
+            const container = levelPool[poolIndex];
+            if (!container) break;
+
+            const data = levelData[i];
+
+            container.x = pos.x;
+            container.y = pos.y;
+
+            container.circle.clear();
+          container.circle.lineStyle(5, 0xffffff);
+
+container.circle.beginFill(
+    data.unlocked ? 0xff4d6d : 0x999999
+);
+
+container.circle.drawCircle(0, 0, 26);
+
+container.circle.endFill();
+            container.text.text = data.level;
+
+            container.visible = true;
+
+            poolIndex++;
+        }
+    }
+
+    // hide extra
+    for (let i = poolIndex; i < levelPool.length; i++) {
+        levelPool[i].visible = false;
+    }
+}
+
+// ============================
+// 🧭 DRAG SCROLL
+// ============================
+
+let dragging = false;
+let lastY = 0;
+
+app.view.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    lastY = e.clientY;
+});
+
+app.view.addEventListener("pointerup", () => {
+    dragging = false;
+});
+
+app.view.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+
+    let delta = e.clientY - lastY;
+    world.y += delta;
+    lastY = e.clientY;
+
+    // clamp
+    if (world.y < maxY) world.y = maxY;
+    if (world.y > minY) world.y = minY;
+});
+
+// 📏 LIMITS
+const firstY = positions[0].y;
+const lastYPos = positions[positions.length - 1].y;
+
+const maxY = -firstY + 400;
+const minY = -lastYPos + 400;
+
+// 🔁 GAME LOOP
+app.ticker.add(() => {
+    updateLevels();
+});
+
+function centerWorld() {
+    const gameWidth = 400;
+
+    const scale = Math.min(window.innerWidth / gameWidth, 1);
+
+    world.scale.set(scale);
+
+    world.x = (app.screen.width - gameWidth * scale) / 2;
+}
+
+window.addEventListener("resize", () => {
+    app.renderer.resize(window.innerWidth, window.innerHeight);
+    centerWorld();
+});
+</script>
+
+</body>
+</html>
