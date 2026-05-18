@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Angry Birds Style UI</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    width:100%;
+    height:100vh;
+    overflow:hidden;
+
+    font-family:'Luckiest Guy',cursive;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:20px;
+
+    background:
+    linear-gradient(
+        to bottom,
+        #87ceeb 0%,
+        #d9f6ff 45%,
+        #73d94c 100%
+    );
+}
+
+/* CLOUDS */
+
+body::before,
+body::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:220px;
+    height:80px;
+
+    background:white;
+
+    border-radius:100px;
+
+    opacity:.9;
+}
+
+body::before{
+    top:70px;
+    left:8%;
+}
+
+body::after{
+    top:130px;
+    right:8%;
+}
+
+/* OPEN BUTTONS */
+
+.open-btn{
+
+    position:relative;
+
+    z-index:5;
+
+    padding:18px 40px;
+
+    border:none;
+    border-radius:22px;
+
+    cursor:pointer;
+
+    color:white;
+
+    font-size:22px;
+
+    transition:.2s;
+}
+
+.level-btn{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #ffe600,
+        #ff9100
+    );
+
+    border:5px solid #8a3c00;
+
+    box-shadow:
+        0 10px 0 #5f2700,
+        0 18px 25px rgba(0,0,0,.35);
+}
+
+.over-btn{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #ff5d5d,
+        #b60000
+    );
+
+    border:5px solid #5b0000;
+
+    box-shadow:
+        0 10px 0 #330000,
+        0 18px 25px rgba(0,0,0,.35);
+}
+
+.open-btn:hover{
+
+    transform:
+        translateY(-4px)
+        scale(1.05);
+}
+
+/* SETTINGS BUTTON */
+
+.settings-btn{
+
+    position:fixed;
+
+    top:20px;
+    right:20px;
+
+    width:80px;
+    height:80px;
+
+    border:none;
+    border-radius:50%;
+
+    cursor:pointer;
+
+    z-index:50;
+
+    font-size:34px;
+
+    color:white;
+
+    background:
+    linear-gradient(
+        to bottom,
+        #ffe16b,
+        #ff9f1a
+    );
+
+    border:5px solid #6d2e00;
+
+    box-shadow:
+        0 10px 0 #4b1f00,
+        0 18px 25px rgba(0,0,0,.35);
+
+    transition:.25s;
+}
+
+.settings-btn:hover{
+
+    transform:scale(1.08);
+}
+
+/* OVERLAY */
+
+.overlay{
+
+    position:fixed;
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    opacity:0;
+    pointer-events:none;
+
+    transition:.4s;
+
+    z-index:100;
+}
+
+.overlay.active{
+
+    opacity:1;
+    pointer-events:auto;
+}
+
+/* POPUP */
+
+.popup{
+
+    width:90%;
+    max-width:520px;
+
+    transform:
+        scale(.2)
+        rotate(-10deg);
+
+    opacity:0;
+
+    transition:
+        .55s cubic-bezier(.2,.8,.2,1.2);
+}
+
+.overlay.active .popup{
+
+    transform:
+        scale(1)
+        rotate(0deg);
+
+    opacity:1;
+}
+
+/* CARD */
+
+.popup-card{
+
+    position:relative;
+
+    overflow:hidden;
+
+    border-radius:35px;
+
+    padding:45px 30px;
+
+    border:8px solid #6d2e00;
+
+    box-shadow:
+        0 18px 0 #4b1f00,
+        0 35px 55px rgba(0,0,0,.45);
+}
+
+/* TOP STRIP */
+
+.popup-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    right:0;
+    top:0;
+
+    height:22px;
+
+    background:
+    repeating-linear-gradient(
+        90deg,
+        #7b3f00 0px,
+        #7b3f00 25px,
+        #8d4f13 25px,
+        #8d4f13 50px
+    );
+}
+
+/* LEVEL COMPLETE */
+
+.level-card{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #ffe16b,
+        #ff9f1a
+    );
+}
+
+/* GAME OVER */
+
+.gameover-card{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #ff6b6b,
+        #990000
+    );
+
+    border-color:#460000;
+
+    box-shadow:
+        0 18px 0 #260000,
+        0 35px 55px rgba(0,0,0,.55);
+}
+
+/* SETTINGS */
+
+.settings-card{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #ffe16b,
+        #ff9f1a
+    );
+}
+
+/* INSTRUCTIONS */
+
+.instructions-card{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #6cc8ff,
+        #006eff
+    );
+}
+
+/* ICON */
+
+.icon{
+
+    text-align:center;
+
+    font-size:100px;
+
+    margin-bottom:10px;
+}
+
+/* SETTINGS ICON */
+
+.settings-top-icon{
+
+    text-align:center;
+
+    font-size:90px;
+
+    margin-bottom:12px;
+}
+
+/* TEXT */
+
+.level-text{
+
+    text-align:center;
+
+    font-size:22px;
+
+    color:#5a2200;
+}
+
+.complete-text{
+
+    text-align:center;
+
+    font-size:50px;
+
+    margin-top:10px;
+
+    color:white;
+
+    text-shadow:
+        0 5px 0 rgba(0,0,0,.25),
+        0 10px 18px rgba(0,0,0,.35);
+}
+
+/* MESSAGE */
+
+.message{
+
+    text-align:center;
+
+    color:white;
+
+    font-size:22px;
+
+    margin-top:18px;
+    margin-bottom:28px;
+}
+
+/* STARS */
+
+.stars{
+
+    display:flex;
+    justify-content:center;
+    gap:18px;
+
+    margin:35px 0;
+
+    min-height:70px;
+}
+
+.star{
+
+    font-size:62px;
+
+    opacity:0;
+
+    transform:
+        scale(0)
+        rotate(-180deg);
+
+    animation:starPop .6s forwards;
+}
+
+@keyframes starPop{
+
+    0%{
+        opacity:0;
+
+        transform:
+            scale(0)
+            rotate(-180deg);
+    }
+
+    70%{
+        opacity:1;
+
+        transform:
+            scale(1.35)
+            rotate(10deg);
+    }
+
+    100%{
+        opacity:1;
+
+        transform:
+            scale(1)
+            rotate(0deg);
+    }
+}
+
+/* BUTTONS */
+
+.btns{
+
+    display:flex;
+    justify-content:center;
+    gap:18px;
+
+    flex-wrap:wrap;
+}
+
+.game-btn{
+
+    padding:16px 28px;
+
+    border:none;
+    border-radius:20px;
+
+    cursor:pointer;
+
+    color:white;
+
+    font-size:18px;
+
+    font-family:'Luckiest Guy',cursive;
+
+    transition:.2s;
+}
+
+.retry{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #ff5f5f,
+        #d10000
+    );
+
+    box-shadow:
+        0 8px 0 #7c0000;
+}
+
+.next{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #8cff66,
+        #29b600
+    );
+
+    box-shadow:
+        0 8px 0 #136400;
+}
+
+.home{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #7c7cff,
+        #2f2fd4
+    );
+
+    box-shadow:
+        0 8px 0 #171781;
+}
+
+.game-btn:hover{
+
+    transform:
+        translateY(-4px)
+        scale(1.05);
+}
+
+/* SETTINGS OPTIONS */
+
+.settings-options{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:18px;
+
+    margin-top:30px;
+    margin-bottom:30px;
+}
+
+/* SETTING ITEM */
+
+.setting-item{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:18px 20px;
+
+    border-radius:18px;
+
+    background:
+    rgba(255,255,255,.18);
+
+    border:4px solid rgba(0,0,0,.12);
+}
+
+/* LEFT TEXT */
+
+.setting-left{
+
+    color:white;
+
+    font-size:22px;
+}
+
+/* TOGGLE */
+
+.toggle{
+
+    position:relative;
+
+    width:80px;
+    height:40px;
+}
+
+.toggle input{
+
+    display:none;
+}
+
+.slider{
+
+    position:absolute;
+
+    inset:0;
+
+    background:#b30000;
+
+    border-radius:50px;
+
+    transition:.3s;
+}
+
+.slider::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:32px;
+    height:32px;
+
+    left:4px;
+    top:4px;
+
+    border-radius:50%;
+
+    background:white;
+
+    transition:.3s;
+}
+
+.toggle input:checked + .slider{
+
+    background:#2ec100;
+}
+
+.toggle input:checked + .slider::before{
+
+    transform:translateX(40px);
+}
+
+/* SETTINGS ACTIONS */
+
+.settings-action-row{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:18px;
+}
+
+.settings-action-btn{
+
+    width:120px;
+
+    padding:18px 10px;
+
+    border-radius:24px;
+
+    cursor:pointer;
+
+    transition:.22s;
+
+    border:5px solid rgba(0,0,0,.15);
+
+    box-shadow:
+        0 10px 0 rgba(0,0,0,.22),
+        0 16px 22px rgba(0,0,0,.22);
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+
+    gap:10px;
+}
+
+.settings-action-btn:hover{
+
+    transform:
+        translateY(-5px)
+        scale(1.05);
+}
+
+.settings-action-icon{
+
+    font-size:42px;
+}
+
+.settings-action-text{
+
+    color:white;
+
+    font-size:18px;
+}
+
+.home-btn{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #7c7cff,
+        #2f2fd4
+    );
+}
+
+.retry-btn{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #ff5f5f,
+        #d10000
+    );
+}
+
+.instruction-btn{
+
+    background:
+    linear-gradient(
+        to bottom,
+        #5ec7ff,
+        #006dff
+    );
+}
+
+/* INSTRUCTIONS */
+
+.instructions-content{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:18px;
+
+    margin-top:25px;
+    margin-bottom:30px;
+}
+
+.instruction-line{
+
+    background:
+    rgba(255,255,255,.18);
+
+    padding:16px 18px;
+
+    border-radius:18px;
+
+    color:white;
+
+    font-size:22px;
+
+    border:4px solid rgba(255,255,255,.15);
+}
+
+/* MOBILE */
+
+@media(max-width:550px){
+
+    body{
+        flex-direction:column;
+    }
+
+    .complete-text{
+        font-size:38px;
+    }
+
+    .star{
+        font-size:48px;
+    }
+
+    .game-btn{
+        width:100%;
+    }
+
+    .settings-action-row{
+
+        gap:10px;
+    }
+
+    .settings-action-btn{
+
+        width:95px;
+
+        padding:16px 8px;
+    }
+
+    .settings-action-icon{
+
+        font-size:34px;
+    }
+
+    .settings-action-text{
+
+        font-size:14px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- OPEN BUTTONS -->
+
+<button class="open-btn level-btn" id="openLevel">
+    LEVEL COMPLETE
+</button>
+
+<button class="open-btn over-btn" id="openGameOver">
+    GAME OVER
+</button>
+
+<!-- SETTINGS BUTTON -->
+
+<button class="settings-btn" id="openSettings">
+    ⚙
+</button>
+
+<!-- LEVEL COMPLETE -->
+
+<div class="overlay" id="levelOverlay">
+
+    <div class="popup">
+
+        <div class="popup-card level-card">
+
+            <div class="icon">🏆</div>
+
+            <div class="level-text">
+                LEVEL 12
+            </div>
+
+            <div class="complete-text">
+                COMPLETE!
+            </div>
+
+            <div class="stars" id="starsContainer"></div>
+
+            <div class="btns">
+
+                <button class="game-btn retry closePopup">
+                    RETRY
+                </button>
+
+                <button class="game-btn next">
+                    NEXT LEVEL
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- GAME OVER -->
+
+<div class="overlay" id="gameOverlay">
+
+    <div class="popup">
+
+        <div class="popup-card gameover-card">
+
+            <div class="icon">💀</div>
+
+            <div class="level-text" style="color:#ffe3e3;">
+                LEVEL FAILED
+            </div>
+
+            <div class="complete-text">
+                GAME OVER
+            </div>
+
+            <div class="message">
+                Better Luck Next Time!
+            </div>
+
+            <div class="btns">
+
+                <button class="game-btn retry closePopup">
+                    RETRY
+                </button>
+
+                <button class="game-btn home">
+                    HOME
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- SETTINGS -->
+
+<div class="overlay" id="settingsOverlay">
+
+    <div class="popup">
+
+        <div class="popup-card settings-card">
+
+            <div class="complete-text">
+                SETTINGS
+            </div>
+
+            <div class="settings-options">
+
+                <!-- MUSIC -->
+
+                <div class="setting-item">
+
+                    <div class="setting-left">
+                        🎵 MUSIC
+                    </div>
+
+                    <label class="toggle">
+
+                        <input type="checkbox"
+                               id="musicToggle"
+                               checked>
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+                <!-- SOUND -->
+
+                <div class="setting-item">
+
+                    <div class="setting-left">
+                        🔊 SOUND
+                    </div>
+
+                    <label class="toggle">
+
+                        <input type="checkbox"
+                               id="soundToggle"
+                               checked>
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+                <!-- ACTIONS -->
+
+                <div class="settings-action-row">
+
+                    <!-- HOME -->
+
+                    <div class="settings-action-btn home-btn">
+
+                        <div class="settings-action-icon">
+                            🏠
+                        </div>
+
+                        <div class="settings-action-text">
+                            HOME
+                        </div>
+
+                    </div>
+
+                    <!-- RETRY -->
+
+                    <div class="settings-action-btn retry-btn">
+
+                        <div class="settings-action-icon">
+                            🔄
+                        </div>
+
+                        <div class="settings-action-text">
+                            RETRY
+                        </div>
+
+                    </div>
+
+                    <!-- GUIDE -->
+
+                    <div class="settings-action-btn instruction-btn"
+                         id="openInstructions">
+
+                        <div class="settings-action-icon">
+                            📜
+                        </div>
+
+                        <div class="settings-action-text">
+                            GUIDE
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="btns">
+
+                <button class="game-btn next closeSettings">
+                    CLOSE
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- INSTRUCTIONS -->
+
+<div class="overlay" id="instructionsOverlay">
+
+    <div class="popup">
+
+        <div class="popup-card instructions-card">
+
+            <div class="icon">
+                📜
+            </div>
+
+            <div class="complete-text">
+                HOW TO PLAY
+            </div>
+
+            <div class="instructions-content">
+
+                <div class="instruction-line">
+                    🎯 Drag bird backward
+                </div>
+
+                <div class="instruction-line">
+                    🚀 Release to launch
+                </div>
+
+                <div class="instruction-line">
+                    🧱 Destroy all enemies
+                </div>
+
+                <div class="instruction-line">
+                    ⭐ Use fewer birds for more stars
+                </div>
+
+                <div class="instruction-line">
+                    🏆 Complete all levels
+                </div>
+
+            </div>
+
+            <div class="btns">
+
+                <button class="game-btn retry closeInstructions">
+                    CLOSE
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+/* ELEMENTS */
+
+const levelOverlay =
+document.getElementById("levelOverlay");
+
+const gameOverlay =
+document.getElementById("gameOverlay");
+
+const settingsOverlay =
+document.getElementById("settingsOverlay");
+
+const instructionsOverlay =
+document.getElementById("instructionsOverlay");
+
+const starsContainer =
+document.getElementById("starsContainer");
+
+/* OPEN BUTTONS */
+
+document.getElementById("openLevel")
+.addEventListener("click",()=>{
+
+    createStars(
+        Math.floor(Math.random()*3)+1
+    );
+
+    levelOverlay.classList.add("active");
+});
+
+document.getElementById("openGameOver")
+.addEventListener("click",()=>{
+
+    gameOverlay.classList.add("active");
+});
+
+document.getElementById("openSettings")
+.addEventListener("click",()=>{
+
+    settingsOverlay.classList.add("active");
+});
+
+document.getElementById("openInstructions")
+.addEventListener("click",()=>{
+
+    instructionsOverlay.classList.add("active");
+});
+
+/* CLOSE */
+
+document.querySelectorAll(".closePopup")
+.forEach(btn=>{
+
+    btn.addEventListener("click",()=>{
+
+        levelOverlay.classList.remove("active");
+
+        gameOverlay.classList.remove("active");
+    });
+});
+
+document.querySelector(".closeSettings")
+.addEventListener("click",()=>{
+
+    settingsOverlay.classList.remove("active");
+});
+
+document.querySelector(".closeInstructions")
+.addEventListener("click",()=>{
+
+    instructionsOverlay.classList.remove("active");
+});
+
+/* CLICK OUTSIDE */
+
+[
+ levelOverlay,
+ gameOverlay,
+ settingsOverlay,
+ instructionsOverlay
+].forEach(overlay=>{
+
+    overlay.addEventListener("click",(e)=>{
+
+        if(e.target === overlay){
+
+            overlay.classList.remove("active");
+        }
+    });
+});
+
+/* STARS */
+
+function createStars(totalStars){
+
+    starsContainer.innerHTML = "";
+
+    for(let i=0;i<totalStars;i++){
+
+        const star =
+        document.createElement("div");
+
+        star.classList.add("star");
+
+        star.innerHTML = "⭐";
+
+        star.style.animationDelay =
+        `${i*.25}s`;
+
+        starsContainer.appendChild(star);
+    }
+}
+
+/* TOGGLES */
+
+const musicToggle =
+document.getElementById("musicToggle");
+
+const soundToggle =
+document.getElementById("soundToggle");
+
+musicToggle.addEventListener("change",()=>{
+
+    console.log(
+        musicToggle.checked
+        ? "Music ON"
+        : "Music OFF"
+    );
+});
+
+soundToggle.addEventListener("change",()=>{
+
+    console.log(
+        soundToggle.checked
+        ? "Sound ON"
+        : "Sound OFF"
+    );
+});
+
+</script>
+
+</body>
+</html>

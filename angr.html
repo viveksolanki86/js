@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<!-- Mobile Responsive -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Advanced Slingshot System</title>
+
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+
+<style>
+
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#87ceeb;
+}
+
+canvas{
+    display:block;
+}
+
+</style>
+</head>
+<body>
+
+<script>
+
+/*
+==================================================
+PHASER CONFIG
+==================================================
+*/
+
+const config = {
+
+    type: Phaser.AUTO,
+
+    width: window.innerWidth,
+    height: window.innerHeight,
+
+    backgroundColor:"#87ceeb",
+
+    physics:{
+        default:"arcade",
+        arcade:{
+            gravity:{
+                y:1000
+            },
+            debug:false
+        }
+    },
+
+    scale:{
+        mode:Phaser.Scale.RESIZE,
+        autoCenter:Phaser.Scale.CENTER_BOTH
+    },
+
+    scene:{
+        preload,
+        create,
+        update
+    }
+};
+
+new Phaser.Game(config);
+
+/*
+==================================================
+GLOBAL VARIABLES
+==================================================
+*/
+
+let bird;
+
+/*
+--------------------------------------------------
+Elastic line graphics
+--------------------------------------------------
+*/
+let ropeGraphics;
+
+/*
+--------------------------------------------------
+Trajectory dots graphics
+--------------------------------------------------
+*/
+let dotsGraphics;
+
+/*
+--------------------------------------------------
+Sling 3 connector
+--------------------------------------------------
+Ye leather holder jaisa part hai
+--------------------------------------------------
+*/
+let sling3;
+
+/*
+--------------------------------------------------
+Fixed sling top points
+--------------------------------------------------
+*/
+let sling1 = { x:260, y:300 };
+let sling2 = { x:340, y:300 };
+
+/*
+--------------------------------------------------
+Default sling3 position
+--------------------------------------------------
+*/
+let sling3Start = { x:300, y:420 };
+
+/*
+--------------------------------------------------
+Current sling3 position
+--------------------------------------------------
+*/
+let sling3Pos = {
+    x:sling3Start.x,
+    y:sling3Start.y
+};
+
+/*
+--------------------------------------------------
+Bird drag state
+--------------------------------------------------
+*/
+let isDragging = false;
+
+/*
+--------------------------------------------------
+Max pull distance
+--------------------------------------------------
+*/
+let maxDistance = 220;
+
+/*
+==================================================
+PRELOAD
+==================================================
+*/
+
+function preload(){}
+
+/*
+==================================================
+CREATE
+==================================================
+*/
+
+function create(){
+
+    /*
+    ------------------------------------------------
+    Ground
+    ------------------------------------------------
+    */
+
+    let ground = this.add.rectangle(
+        this.scale.width/2,
+        this.scale.height-60,
+        this.scale.width,
+        120,
+        0x4caf50
+    );
+
+    this.physics.add.existing(ground,true);
+
+    /*
+    ------------------------------------------------
+    LEFT STATIC WOOD
+    ------------------------------------------------
+    */
+
+    this.add.rectangle(
+        sling1.x,
+        sling1.y,
+        30,
+        220,
+        0x5d4037
+    );
+
+    /*
+    ------------------------------------------------
+    RIGHT STATIC WOOD
+    ------------------------------------------------
+    */
+
+    this.add.rectangle(
+        sling2.x,
+        sling2.y,
+        30,
+        220,
+        0x5d4037
+    );
+
+    /*
+    ------------------------------------------------
+    ROPE GRAPHICS
+    ------------------------------------------------
+    */
+
+    ropeGraphics = this.add.graphics();
+
+    /*
+    ------------------------------------------------
+    TRAJECTORY GRAPHICS
+    ------------------------------------------------
+    */
+
+    dotsGraphics = this.add.graphics();
+
+    /*
+    ------------------------------------------------
+    SLING 3
+    ------------------------------------------------
+    Ye leather holder hai
+    ------------------------------------------------
+    */
+
+    sling3 = this.add.rectangle(
+        sling3Pos.x,
+        sling3Pos.y,
+        70,
+        30,
+        0x3e2723
+    );
+
+    /*
+    ------------------------------------------------
+    BIRD
+    ------------------------------------------------
+    */
+
+    bird = this.add.circle(
+        sling3Pos.x,
+        sling3Pos.y,
+        28,
+        0xff0000
+    );
+
+    /*
+    ------------------------------------------------
+    Bird interactive
+    ------------------------------------------------
+    */
+
+    bird.setInteractive();
+
+    /*
+    ------------------------------------------------
+    Physics enable
+    ------------------------------------------------
+    */
+
+    this.physics.add.existing(bird);
+
+    /*
+    ------------------------------------------------
+    Bird body setup
+    ------------------------------------------------
+    */
+
+    bird.body.setCircle(28);
+
+    bird.body.setBounce(0.5);
+
+    bird.body.setCollideWorldBounds(true);
+
+    this.physics.add.collider(bird,ground);
+
+    /*
+    ------------------------------------------------
+    IMPORTANT
+    ------------------------------------------------
+    Initially physics disable
+    Bird sling me static rahega
+    ------------------------------------------------
+    */
+
+    bird.body.moves = false;
+
+    /*
+    ------------------------------------------------
+    DRAG ENABLE
+    ------------------------------------------------
+    */
+
+    this.input.setDraggable(bird);
+
+    /*
+    ==================================================
+    DRAG START
+    ==================================================
+    */
+
+    this.input.on("dragstart",()=>{
+
+        isDragging = true;
+
+    });
+
+    /*
+    ==================================================
+    DRAG
+    ==================================================
+    */
+
+    this.input.on("drag",(pointer,obj,dragX,dragY)=>{
+
+        /*
+        ----------------------------------------------
+        Distance from center
+        ----------------------------------------------
+        */
+
+        let dx = dragX - sling3Start.x;
+        let dy = dragY - sling3Start.y;
+
+        let distance = Math.sqrt(dx*dx + dy*dy);
+
+        /*
+        ----------------------------------------------
+        Clamp max distance
+        ----------------------------------------------
+        */
+
+        if(distance > maxDistance){
+
+            let angle = Math.atan2(dy,dx);
+
+            dragX =
+                sling3Start.x +
+                Math.cos(angle) * maxDistance;
+
+            dragY =
+                sling3Start.y +
+                Math.sin(angle) * maxDistance;
+        }
+
+        /*
+        ----------------------------------------------
+        Move bird
+        ----------------------------------------------
+        */
+
+        bird.x = dragX;
+        bird.y = dragY;
+
+        /*
+        ----------------------------------------------
+        Sling3 follows bird
+        ----------------------------------------------
+        */
+
+        sling3.x = dragX;
+        sling3.y = dragY;
+
+        /*
+        ----------------------------------------------
+        Trajectory dots
+        ----------------------------------------------
+        */
+
+        drawTrajectory();
+
+    });
+
+    /*
+    ==================================================
+    DRAG END
+    ==================================================
+    */
+
+    this.input.on("dragend",()=>{
+
+        isDragging = false;
+
+        /*
+        ----------------------------------------------
+        Launch power
+        ----------------------------------------------
+        */
+
+        let powerX =
+            (sling3Start.x - bird.x) * 5;
+
+        let powerY =
+            (sling3Start.y - bird.y) * 5;
+
+        /*
+        ----------------------------------------------
+        Enable physics
+        ----------------------------------------------
+        */
+
+        bird.body.moves = true;
+
+        /*
+        ----------------------------------------------
+        Apply velocity
+        ----------------------------------------------
+        */
+
+        bird.body.setVelocity(
+            powerX,
+            powerY
+        );
+
+        /*
+        ----------------------------------------------
+        Reset sling3
+        ----------------------------------------------
+        */
+
+        sling3.x = sling3Start.x;
+        sling3.y = sling3Start.y;
+
+        /*
+        ----------------------------------------------
+        Clear trajectory
+        ----------------------------------------------
+        */
+
+        dotsGraphics.clear();
+
+    });
+
+}
+
+/*
+==================================================
+UPDATE
+==================================================
+*/
+
+function update(){
+
+    /*
+    ------------------------------------------------
+    Clear old ropes
+    ------------------------------------------------
+    */
+
+    ropeGraphics.clear();
+
+    /*
+    ------------------------------------------------
+    Rope thickness & color
+    ------------------------------------------------
+    */
+
+    ropeGraphics.lineStyle(8,0x3e2723);
+
+    /*
+    ------------------------------------------------
+    LEFT ROPE
+    ------------------------------------------------
+    */
+
+    ropeGraphics.beginPath();
+
+    ropeGraphics.moveTo(
+        sling1.x,
+        sling1.y
+    );
+
+    ropeGraphics.lineTo(
+        sling3.x,
+        sling3.y
+    );
+
+    ropeGraphics.strokePath();
+
+    /*
+    ------------------------------------------------
+    RIGHT ROPE
+    ------------------------------------------------
+    */
+
+    ropeGraphics.beginPath();
+
+    ropeGraphics.moveTo(
+        sling2.x,
+        sling2.y
+    );
+
+    ropeGraphics.lineTo(
+        sling3.x,
+        sling3.y
+    );
+
+    ropeGraphics.strokePath();
+
+}
+
+/*
+==================================================
+TRAJECTORY FUNCTION
+==================================================
+*/
+
+function drawTrajectory(){
+
+    /*
+    ------------------------------------------------
+    Clear old dots
+    ------------------------------------------------
+    */
+
+    dotsGraphics.clear();
+
+    /*
+    ------------------------------------------------
+    Calculate launch velocity
+    ------------------------------------------------
+    */
+
+    let vx =
+        (sling3Start.x - bird.x) * 5;
+
+    let vy =
+        (sling3Start.y - bird.y) * 5;
+
+    /*
+    ------------------------------------------------
+    Gravity
+    ------------------------------------------------
+    */
+
+    let gravity = 1000;
+
+    /*
+    ------------------------------------------------
+    Draw multiple dots
+    ------------------------------------------------
+    */
+
+    for(let i=0; i<60; i++){
+
+        /*
+        --------------------------------------------
+        Time step
+        --------------------------------------------
+        */
+
+        let t = i * 0.08;
+
+        /*
+        --------------------------------------------
+        Physics formula
+        --------------------------------------------
+        x = vx * t
+        y = vy * t + gravity
+        --------------------------------------------
+        */
+
+        let x =
+            bird.x + vx * t;
+
+        let y =
+            bird.y +
+            vy * t +
+            0.5 * gravity * t * t;
+
+        /*
+        --------------------------------------------
+        Draw dot
+        --------------------------------------------
+        */
+
+        dotsGraphics.fillStyle(0xffffff,1);
+
+        dotsGraphics.fillCircle(
+            x,
+            y,
+            5
+        );
+    }
+}
+
+</script>
+
+</body>
+</html>
